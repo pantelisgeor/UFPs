@@ -5,7 +5,7 @@ import argparse
 # ========================== Argument parser =========================== #
 parser = argparse.ArgumentParser()
 
-parser.add_argument("data_root", type=str, 
+parser.add_argument("--data_root", type=str, 
                     help="Path to directory where data is stored")
 
 args = parser.parse_args()
@@ -39,8 +39,8 @@ def get_population(data_root=args.data_root, year=2020):
     # Download the dataset
     response = wget.download(url, 
                              f"{path}/ppp_{year}_1km_Aggregated.tif")
-    
-    
+
+
 # ------------------------------------------------------------------------------- #
 def downloadCDS(month, 
                 year,

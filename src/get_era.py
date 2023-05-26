@@ -1,18 +1,18 @@
-import cdsapi
 import os
 import argparse
 import datetime
+import cdsapi
 import numpy as np
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--data_root", 
+parser.add_argument("--data_root",
                     help="Path to directory where data is stored")
-parser.add_argument("--variable", 
+parser.add_argument("--variable",
                     help="Variable to download (match the era5-land variable name)")
 parser.add_argument("--years", type=lambda x: x.split(','),
                     help="Years to download data for (separated by comma)")
-parser.add_argument("--short_name", 
+parser.add_argument("--short_name",
                     help="Short name for variable (also dir name in data_root)")
 parser.add_argument("--dataset", help="CDS datastore dataset identifier",
                     default="reanalysis-era5-land")

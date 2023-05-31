@@ -6,6 +6,7 @@ import torch
 from src.create_model import convAutoEncoder
 from src.data_loader import NcDataset
 from src.utils import str2bool, RMSELoss, train_loop, test_loop
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 
@@ -69,19 +70,12 @@ if __name__ == "__main__":
         
         
 # Datasets (training and test)
-views=["t2m0", "no0", "no20"]
+views=["land_1", "land_2", "land_3", "land_4", "land_5", 
+       "t2m0", "u100", "v100", "tp0", "no0", "no20"]
 
 training_data = NcDataset(
     parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test1/train.parquet",
     root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test1/train",
-    views=views)
-training_data2 = NcDataset(
-    parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test2/train.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test2/train",
-    views=views)
-training_data3 = NcDataset(
-    parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test3/train.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test3/train",
     views=views)
 
 test_data = NcDataset(
@@ -90,24 +84,22 @@ test_data = NcDataset(
     views=views)
 
 # DataLoader objects
-train_dataloader = DataLoader(training_data, batch_size=400, shuffle=True)
-train_dataloader2 = DataLoader(training_data2, batch_size=400, shuffle=True)
-train_dataloader3 = DataLoader(training_data3, batch_size=400, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=400, shuffle=False)
+train_dataloader = DataLoader(training_data, batch_size=128, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=128, shuffle=False)
 
 
 model = convAutoEncoder(channels=len(views))
 model.to("cuda")
         
  # Loss function definition
-loss_fn = RMSELoss()  #nn.MSELoss()
+loss_fn = nn.MSELoss()  #RMSELoss()
         
 # Optimizer
 # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-5)
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)  # , weight_decay=1e-5)
 
 
-for ep in range(10):
+for ep in range(20):
     print(f"Epoch {ep} \n")
     train_loop(train_dataloader, model, loss_fn, optimizer)
     # train_loop(train_dataloader2, model, loss_fn, optimizer)
@@ -140,6 +132,7 @@ train_dataloader_Test = DataLoader(training_data, batch_size=1, shuffle=False)
 
 device = "cuda"
 outputs = []
+outputs_ = []
 gr_truth = []
 inputs = []
 with torch.no_grad():
@@ -148,9 +141,10 @@ with torch.no_grad():
         if device == "cuda":
             X, y = X.cuda(), y.cuda()
         # Calculate the model's prediction
-        gr_truth.append(y)
-        outputs.append(model(X))
-        inputs.append(X)
+        gr_truth.append(y.item())
+        outputs.append(model(X).item())
+        outputs_.append(the_model(X).item())
+        # inputs.append(X)
         
         
         

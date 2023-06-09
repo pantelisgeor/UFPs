@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch
 from src.create_model import convAutoEncoder
-from src.data_loader import NcDataset
+from src.data_loader import NcDataset, NcDatasetMem
 from src.utils import str2bool, RMSELoss, train_loop, test_loop
 
 parser = argparse.ArgumentParser()
@@ -69,31 +69,36 @@ if __name__ == "__main__":
         
         
 # Datasets (training and test)
-views=["t2m0", "no0", "no20"]
+views=['land_1', 'land_2', 'land_3', 'land_4', 'land_5', 'land_6', 'land_7',
+       "t2m0", "d2m0", "tp0", "u100", "v100", "no0", "no20", "co0"]
 
 training_data = NcDataset(
-    parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test1/train.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test1/train",
+    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test1/train.parquet",
+    root_dir="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test1/train",
     views=views)
 training_data2 = NcDataset(
-    parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test2/train.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test2/train",
+    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test2/train.parquet",
+    root_dir="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test2/train",
     views=views)
 training_data3 = NcDataset(
-    parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test3/train.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test3/train",
+    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test3/train.parquet",
+    root_dir="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test3/train",
+    views=views)
+training_data4 = NcDataset(
+    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test4/train.parquet",
+    root_dir="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test3/train",
     views=views)
 
 test_data = NcDataset(
-    parquet_file="/home/pantelisgeorgiades/Python/UFP/datasets/test1/test.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test1/test",
+    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test1/test.parquet",
+    root_dir="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/test1/test",
     views=views)
 
 # DataLoader objects
-train_dataloader = DataLoader(training_data, batch_size=400, shuffle=True)
-train_dataloader2 = DataLoader(training_data2, batch_size=400, shuffle=True)
-train_dataloader3 = DataLoader(training_data3, batch_size=400, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=400, shuffle=False)
+train_dataloader = DataLoader(training_data, batch_size=128, shuffle=True)
+train_dataloader2 = DataLoader(training_data2, batch_size=128, shuffle=True)
+train_dataloader3 = DataLoader(training_data3, batch_size=128, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=128, shuffle=False)
 
 
 model = convAutoEncoder(channels=len(views))
@@ -103,21 +108,21 @@ model.to("cuda")
 loss_fn = RMSELoss()  #nn.MSELoss()
         
 # Optimizer
-# optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-5)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+# optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-5)
 
 
-for ep in range(10):
+for ep in range(150):
     print(f"Epoch {ep} \n")
     train_loop(train_dataloader, model, loss_fn, optimizer)
-    # train_loop(train_dataloader2, model, loss_fn, optimizer)
-    # train_loop(train_dataloader3, model, loss_fn, optimizer)
+    train_loop(train_dataloader2, model, loss_fn, optimizer)
+    train_loop(train_dataloader3, model, loss_fn, optimizer)
     print("Test score: ")
     test_loop(test_dataloader, model, loss_fn)
 
         
         
-path_model = "/home/pantelisgeorgiades/Python/UFP/datasets_/models/test1.pt"
+path_model = "/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets_/models/test1.pt"
 
 torch.save(model.state_dict(), path_model)
 
@@ -143,7 +148,7 @@ outputs = []
 gr_truth = []
 inputs = []
 with torch.no_grad():
-    for idx, (X, y) in tqdm(enumerate(train_dataloader_Test)):
+    for idx, (X, y) in tqdm(enumerate(test_dataloader)):
         # Move these to GPU if device is cuda
         if device == "cuda":
             X, y = X.cuda(), y.cuda()

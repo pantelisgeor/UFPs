@@ -82,9 +82,9 @@ def train_loop(dataloader, model, loss_fn, optimizer, device="cuda"):
         loss.backward()
         optimizer.step()
         
-        if batch & 10 == 0:
+        if batch % 10 == 0:
             loss, current = loss.item(), (batch+1)*len(X)
-            print(f"loss: {loss:>7f} [{current:>5d}/{size:>5d}]")
+            print(f"loss: {loss:>7f} [{current:>5d}/{size:>5d}]", flush=True)
             
             
 def test_loop(dataloader, model, loss_fn, device="cuda"):
@@ -115,3 +115,5 @@ def test_loop(dataloader, model, loss_fn, device="cuda"):
                         
     test_loss /= num_batches
     print(f"Test Error: Average MSE: {test_loss:>8f} \n")
+    
+    

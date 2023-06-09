@@ -7,17 +7,16 @@ import pandas as pd
 from tqdm.contrib.concurrent import process_map
 from functools import partial
 
-path_dat = "/home/pantelisgeorgiades/Python/UFP/datasets/test1"
 
-def repl_nan(f, train=True, path_dat=path_dat,
-             path_ranges="/home/pantelisgeorgiades/Python/UFP/cams_clim_lims.csv"):
+def repl_nan(f, path_dat, train=True,
+             path_ranges="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/UFPs/data/dat_lims.csv"):
     # Read the dataset
     ds = xr.open_dataset(f"{'train' if train else 'test'}/{f}")
     # Read the limits dataframe
     df_lims = pd.read_csv(path_ranges)
-    # df_lims = df_lims\
-    #     .groupby('var', as_index=False)\
-    #         .agg({'min': np.min, 'max': np.max})
+    df_lims = df_lims\
+        .groupby('var', as_index=False)\
+            .agg({'min': np.min, 'max': np.max})
     # Replace missing values with mean in the channel
     for vr in ds.variables:
         if np.sum(ds[vr].isnull()).item() > 0:
@@ -56,11 +55,13 @@ def replace_nan_all(path_dat):
     dat_train = glob1("train/", "*.nc")
     dat_test = glob1("test/", "*.nc")
     
-    process_map(repl_nan, dat_train, max_workers=10)
-    process_map(partial(repl_nan, train=False), 
+    process_map(partial(repl_nan, path_dat=path_dat, train=True), 
+                dat_train, max_workers=10)
+    process_map(partial(repl_nan, path_dat=path_dat, train=False), 
                 dat_test, max_workers=10)
 
 
-replace_nan_all(path_dat = "/home/pantelisgeorgiades/Python/UFP/datasets/test1")
-replace_nan_all(path_dat = "/home/pantelisgeorgiades/Python/UFP/datasets/test2")
-replace_nan_all(path_dat = "/home/pantelisgeorgiades/Python/UFP/datasets/test3")
+replace_nan_all(path_dat = "/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test1")
+replace_nan_all(path_dat = "/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test2")
+replace_nan_all(path_dat = "/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test3")
+replace_nan_all(path_dat = "/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test4")

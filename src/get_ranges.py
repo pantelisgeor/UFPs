@@ -86,9 +86,26 @@ dataset = "/CAMS/NO2"
 extension = "*.nc"
 # Vars
 var = 'no2'
-cams_lims = get_lims_par(path_dat, dataset, extension, var, max_workers=10)
+cams_lims_no2 = get_lims_par(path_dat, dataset, extension, var, max_workers=10)
 
+# CAMS_NO Datasets
+# Dataset relative path to path_dat and extension of data
+dataset = "/CAMS/NO"
+extension = "*.nc"
+# Vars
+var = 'no'
+cams_lims_no = get_lims_par(path_dat, dataset, extension, var, max_workers=10)
 
+# CAMS_CO Datasets
+# Dataset relative path to path_dat and extension of data
+dataset = "/CAMS/CO"
+extension = "*.nc"
+# Vars
+var = 'co'
+cams_lims_co = get_lims_par(path_dat, dataset, extension, var, max_workers=10)
+
+cams_lims = pd.concat([cams_lims_no2, cams_lims_no, cams_lims_co], axis=0)
+cams_lims.to_csv(f"{path_dat}/cams_lims.csv", index=False)
 
 # ERA5L
 datasets = ["d2m", "t2m", "tp", "solar_net", "thermal_net", "u_wind", "v_wind"]

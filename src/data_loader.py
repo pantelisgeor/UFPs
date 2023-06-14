@@ -137,7 +137,7 @@ class NcDatasetMem2(Dataset):
         dat = dat.to_array().values.squeeze()
         dat = dat[:, 27:37, 27:37]
         # sample dictionary (convert numpy array to tensor)
-        sample = {'nc': torch.tensor(dat, 
+        sample = {'nc': torch.tensor(dat.to_array().values.squeeze(), 
                                      dtype=torch.float32), 
                   'target': self.target_value.iloc[idx, -3],
                   'views': self.views}

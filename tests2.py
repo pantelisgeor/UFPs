@@ -4,49 +4,41 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch
 from src.create_model import convAutoEncoder, FeedForward, convAutoEncoder2
-from src.data_loader import NcDataset, NcDatasetMem
+from src.data_loader import pm01data
 from src.utils import str2bool, RMSELoss, train_loop, test_loop
 from tqdm import tqdm
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-# Datasets (training and test)
-views=["land_1", "land_2", "land_3", "land_4", "land_5", 
-       "t2m0", "u100", "v100", "tp0", "no0", "no20"]
+path_dat = "/nvme/h/pgeorgiades/data_p143/UFPs/datasets/stations"
+path_target = "/nvme/h/pgeorgiades/data_p143/UFPs/data/UFP_Datasets/Evaluation_Europe.nc"
+# List the stations
+stations = [x.split(".")[0] for x in os.listdir(path_dat)]
+station_train = stations[:26]
+station_test = stations[26:]
 
-views = ["no-2", "no2-2", "no0", "no20", "no2", "no22"]
 
-training_data = NcDatasetMem(
-    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test1/train_.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test1/train",
-    views=views)
-"""
-training_data2 = NcDatasetMem(
-    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test2/train_.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test2/train",
-    views=views)
-training_data3 = NcDatasetMem(
-    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test2/test_.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test2/test",
-    views=views)
-"""
-test_data = NcDatasetMem(
-    parquet_file="/nvme/h/pgeorgiades/data_p102/pantelis/UFPs/datasets/test1/test_.parquet",
-    root_dir="/home/pantelisgeorgiades/Python/UFP/datasets_/test1/test",
-    views=views)
+training_data = pm01data(path_dat=path_dat, path_target=path_target,
+                         station_list=station_train)
+test_data = pm01data(path_dat=path_dat, path_target=path_target,
+                     station_list=station_test)
 
 # DataLoader objects
-train_dataloader = DataLoader(training_data, batch_size=256, shuffle=True)
+train_dataloader = DataLoader(training_data, batch_size=256, 
+                              shuffle=True)
 # train_dataloader2 = DataLoader(training_data2, batch_size=128, shuffle=True)
 # train_dataloader3 = DataLoader(training_data3, batch_size=128, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=256, shuffle=False)
+test_dataloader = DataLoader(test_data, batch_size=256, 
+                             shuffle=False)
 
 
-model = convAutoEncoder2(channels=len(views))
-model.to("cuda")
+model = convAutoEncoder2(channels=training_data.__getitem__(10)[0].shape[0])
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Running on {device}.")
+model.to(device)
         
- # Loss function definition
+# Loss function definition
 loss_fn = nn.MSELoss()  #RMSELoss()
         
 # Optimizer
@@ -57,11 +49,11 @@ optimizer = torch.optim.SGD(model.parameters(), lr=1e-5)
 
 for ep in range(4):
     print(f"Epoch {ep} \n")
-    train_loop(train_dataloader, model, loss_fn, optimizer)
+    train_loop(train_dataloader, model, loss_fn, optimizer, device=device)
     # train_loop(train_dataloader2, model, loss_fn, optimizer)
     # train_loop(train_dataloader3, model, loss_fn, optimizer)
     print("Test score: ")
-    test_loop(test_dataloader, model, loss_fn)
+    test_loop(test_dataloader, model, loss_fn, device=device)
 
 
 test_dataloader = DataLoader(test_data, batch_size=1, shuffle=False)

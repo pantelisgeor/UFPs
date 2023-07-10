@@ -426,6 +426,7 @@ def get_era_point(df_era, lat, lon, time_):
     return df_temp
 
 
+
 # ================================================================ #
 # ================================================================ #
 # Read the dataset
@@ -447,8 +448,8 @@ station = stations[["lat", "lon"]].values[0]
 # Subset for station 1
 df2 = df.loc[(df.lat == station[0]) & (df.lon == station[1])]
 # Add a column for the year and month for each row
-df2 = df2.assign(year = [int(x.split("-")[0]) for x in df2.time.values],
-                 month = [int(x.split('-')[1]) for x in df2.time.values])
+df2 = df2.assign(year=[int(x.split("-")[0]) for x in df2.time.values],
+                 month=[int(x.split('-')[1]) for x in df2.time.values])
 # Convert time to pandas datetime object
 df2 = df2.assign(time=pd.to_datetime(df2.time.values))
 
@@ -662,8 +663,8 @@ def get_day(dataset_index, time, path_save,
             # ERA5:
             df_temp = pd.concat(
                 [get_era_point(df_era,
-                            lat, lon,
-                            time + np.timedelta64(t_, "h")) for lat, lon in coords])
+                               lat, lon,
+                               time + np.timedelta64(t_, "h")) for lat, lon in coords])
             df_temp.columns = [f"{x}{t_}" for x in df_temp.columns]
             df_temp = pd.concat([df_temp.assign(time=time).reset_index(drop=True),
                                 pd.DataFrame(coords, columns=['lat', 'lon'])], axis=1)

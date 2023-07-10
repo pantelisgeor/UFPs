@@ -33,7 +33,7 @@ class convAutoEncoder(nn.Module):
             nn.Linear(in_features=512, out_features=128),
             nn.ReLU(),
             nn.Linear(in_features=128, out_features=32),
-            nn.ReLU(),
+            # nn.ReLU(),
             nn.Linear(in_features=32, out_features=1)
         )
 
@@ -65,7 +65,7 @@ class FeedForward(nn.Module):
             nn.Linear(in_features=512, out_features=128),
             nn.ReLU(),
             nn.Linear(in_features=128, out_features=32),
-            nn.ReLU(),
+            # nn.ReLU(),
             nn.Linear(in_features=32, out_features=1)
         )
 
@@ -131,6 +131,7 @@ class convAutoEncoder2(nn.Module):
         """Forward layer"""
         # Rest of network
         x = self.layer3(self.layer2(self.layer1(X)))
+        # print(f"x.shape: {x.shape}\n")
         # Flatten it
         x = x.view(x .size(0), -1)
         x = self.fc(x)

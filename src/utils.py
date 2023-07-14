@@ -69,6 +69,7 @@ def train_loop(dataloader, model, loss_fn, optimizer, device="cuda"):
     
     # Loop through the mini-batches and perform the training procedures
     for batch, (X, y) in enumerate(dataloader):
+        # print(batch)
         # Move the batch to gpu (cuda) if device == "cuda"
         if device == "cuda":
             X, y = X.cuda(), y.cuda()

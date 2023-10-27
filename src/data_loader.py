@@ -130,15 +130,15 @@ class pm01data_(Dataset):
                     del st_temp, targ_temp
             except Exception as e:
                 print(f"{e}\n{st} has failed!")
-                
+
         self.dat = st_dat
         self.target = targ_dat
         del i, st, st_dat, targ_dat
         gc.collect()
-        
+
     def __len__(self):
         return len(self.target)
-    
+
     def __getitem__(self, idx):
         if self.views:
             return self.dat[:, idx, :, :], self.target[idx]

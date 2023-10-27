@@ -26,21 +26,21 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
-    
-    
+
+
 class RMSELoss(nn.Module):
     """ Pytorch Implementation of Root Mean Square Error
 
     Args:
         nn (_type_): _description_
     """
-    
+
     def __init__(self, eps=1e-6):
         super().__init__()
         self.mse = nn.MSELoss()
         self.eps = eps
-        
-    def forward(self,yhat,y):
+
+    def forward(self, yhat, y):
         """_summary_
 
         Args:
@@ -50,10 +50,10 @@ class RMSELoss(nn.Module):
         Returns:
             float: Root mean squared error between yhat and y
         """
-        loss = torch.sqrt(self.mse(yhat,y) + self.eps)
+        loss = torch.sqrt(self.mse(yhat, y) + self.eps)
         return loss
-    
-    
+
+
 def train_loop(dataloader, model, loss_fn, optimizer, device="cuda"):
     """Train loop for training the pytorch model
 
@@ -73,21 +73,21 @@ def train_loop(dataloader, model, loss_fn, optimizer, device="cuda"):
         # Move the batch to gpu (cuda) if device == "cuda"
         if device == "cuda":
             X, y = X.cuda(), y.cuda()
-            
+
         # Compute prediction and loss
         pred = model(X)
         loss = loss_fn(pred, y)
-        
+
         # Perform backpropagation procedures (and update the parameters)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
+
         if batch % 10 == 0:
             loss, current = loss.item(), (batch+1)*len(X)
             print(f"loss: {loss:>7f} [{current:>5d}/{size:>5d}]", flush=True)
-            
-            
+
+
 def test_loop(dataloader, model, loss_fn, device="cuda"):
     """Iterates over the test set and calculates the errors
 
@@ -116,5 +116,4 @@ def test_loop(dataloader, model, loss_fn, device="cuda"):
                         
     test_loss /= num_batches
     print(f"Test Error: Average MSE: {test_loss:>8f} \n")
-    
     
